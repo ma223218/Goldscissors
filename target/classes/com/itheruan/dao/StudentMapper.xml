@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheruan.dao.StudentMapper">
+
+    <resultMap id="findAllStudent" type="student">
+        <id property="sid" column="sid"></id>
+        <result property="name" column="name"></result>
+        <result property="sex" column="sex"></result>
+
+        <association property="classroom" column="class_id" javaType="classroom">
+
+            <result property="className" column="class_name"></result>
+
+        </association>
+    </resultMap>
+
+
+    <resultMap id="studentMap" type="student">
+        <id property="sid" column="sid"></id>
+        <result property="name" column="name"></result>
+        <result property="sex" column="sex"></result>
+        <result property="classId" column="class_id"></result>
+    </resultMap>
+
+    <!-- 查询所有 -->
+    <select id="findAllStudent" resultMap="findAllStudent">
+         select s.sid,s.name,s.sex,c.class_name from student s left outer join classroom c on s.class_id = c.class_id
+    </select>
+
+
+    <!--查询一条-->
+    <select id="findByStudentIdList" parameterType="int" resultType="student">
+        select * from student s
+        <where>
+            <if test="list !=null and list.size() > 0">
+                <foreach collection="list" open="s.sid in (" close=")" item="sid" separator=",">
+                    #{sid}
+                </foreach>
+            </if>
+
+        </where>
+
+    </select>
+
+    <!--查询一条-->
+    <select id="findByStudent" parameterType="INT" resultMap="studentMap">
+         select * from student s where  s.sid = #{sid}
+    </select>
+
+
+    <!--保存-->
+    <!-- 保存用户 -->
+    <insert id="saveStudent" parameterType="student" useGeneratedKeys="true">
+        insert into student(name,sex,class_id)values(#{name},#{sex},#{classId});
+    </insert>
+
+    <!-- 修改 -->
+    <update id="updateStudent" parameterType="student">
+        update student set name=#{name},sex=#{sex},class_id=#{classId} where sid=#{sid}
+    </update>
+
+
+    <!--删除-->
+
+    <!-- 删除用户-->
+    <delete id="deleteStudent" parameterType="INT">
+        delete from student where sid = #{sid}
+    </delete>
+
+
+    <select id="findALLMap" resultType="map">
+        select * from student
+    </select>
+
+
+    <!--discriminator测试-->
+    <select id="findORId" resultMap="discriminatorMap">
+        select * from student where sid = #{sid}
+    </select>
+
+
+    <resultMap id="discriminatorMap" type="student">
+        <discriminator javaType="int" column="sid">
+            <case value="3" resultMap="s1"></case>
+        </discriminator>
+    </resultMap>
+
+
+    <resultMap id="s1" type="student">
+        <result property="classId" column="class_id"></result>
+    </resultMap>
+
+
+</mapper>
